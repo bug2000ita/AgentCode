@@ -98,13 +98,23 @@ def game_loop() -> None:
         dx = math.cos(angle) * move_speed
         dy = math.sin(angle) * move_speed
         if keys[pygame.K_UP] or keys[pygame.K_w]:
-            if MAP[int(py + dy)][int(px + dx)] == ".":
-                px += dx
-                py += dy
+            nx, ny = px + dx, py + dy
+            cell_x, cell_y = int(nx), int(ny)
+            if (
+                0 <= cell_x < len(MAP[0])
+                and 0 <= cell_y < len(MAP)
+                and MAP[cell_y][cell_x] == "."
+            ):
+                px, py = nx, ny
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            if MAP[int(py - dy)][int(px - dx)] == ".":
-                px -= dx
-                py -= dy
+            nx, ny = px - dx, py - dy
+            cell_x, cell_y = int(nx), int(ny)
+            if (
+                0 <= cell_x < len(MAP[0])
+                and 0 <= cell_y < len(MAP)
+                and MAP[cell_y][cell_x] == "."
+            ):
+                px, py = nx, ny
 
         screen.fill((0, 0, 0))
 
@@ -115,11 +125,9 @@ def game_loop() -> None:
             start = int(SCREEN_HEIGHT / 2 - wall_height / 2)
             end = int(SCREEN_HEIGHT / 2 + wall_height / 2)
             tex_column = int(tex_x * texture.get_width())
-            for y in range(start, end):
-                sample_y = (y - start) / max(end - start, 1)
-                tex_y = int(sample_y * texture.get_height())
-                color = texture.get_at((tex_column, tex_y))
-                screen.set_at((x, y), color)
+            column = texture.subsurface(pygame.Rect(tex_column, 0, 1, texture.get_height()))
+            column = pygame.transform.scale(column, (1, end - start))
+            screen.blit(column, (x, start))
 
         pygame.display.flip()
         clock.tick(60)
