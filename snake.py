@@ -6,6 +6,8 @@ def main() -> None:
     """Run the snake game using the curses interface."""
     stdscr = curses.initscr()
     curses.curs_set(0)
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_BLACK)
     h, w = stdscr.getmaxyx()
     win = curses.newwin(h, w, 0, 0)
     win.keypad(True)
@@ -61,7 +63,7 @@ def main() -> None:
                 tail = snake.pop()
                 win.addch(tail[0], tail[1], " ")
 
-            win.addch(head[0], head[1], curses.ACS_CKBOARD)
+            win.addch(head[0], head[1], curses.ACS_CKBOARD, curses.color_pair(1))
 
     except KeyboardInterrupt:
         pass
