@@ -79,6 +79,10 @@ def game_loop() -> None:
     clock = pygame.time.Clock()
     texture = create_brick_texture()
 
+    # List of active water "splashes" drawn when the player shoots.
+    # Each entry is a countdown of frames to keep the splash visible.
+    splashes: list[int] = []
+
     px, py = 3.0, 3.0
     angle = 0.0
     move_speed = 0.1
@@ -89,6 +93,9 @@ def game_loop() -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                # Spawn a new splash when the player shoots water.
+                splashes.append(10)
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
@@ -128,6 +135,27 @@ def game_loop() -> None:
             column = texture.subsurface(pygame.Rect(tex_column, 0, 1, texture.get_height()))
             column = pygame.transform.scale(column, (1, end - start))
             screen.blit(column, (x, start))
+
+        # Draw active water splashes at the center of the screen.
+        for i in range(len(splashes)):
+            pygame.draw.circle(
+                screen,
+                (0, 150, 255),
+                (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
+                10,
+            )
+            splashes[i] -= 1
+        splashes = [s for s in splashes if s > 0]
+
+        # Draw a simple water pistol overlay so the player sees it in
+        # first-person view. It stays anchored to the bottom right of the
+        # screen, giving the illusion of a held weapon.
+        handle = pygame.Rect(SCREEN_WIDTH - 110, SCREEN_HEIGHT - 50, 25, 40)
+        body = pygame.Rect(SCREEN_WIDTH - 120, SCREEN_HEIGHT - 70, 90, 25)
+        barrel = pygame.Rect(SCREEN_WIDTH - 65, SCREEN_HEIGHT - 85, 60, 15)
+        pygame.draw.rect(screen, (40, 40, 40), body)
+        pygame.draw.rect(screen, (0, 200, 255), barrel)
+        pygame.draw.rect(screen, (70, 70, 70), handle)
 
         pygame.display.flip()
         clock.tick(60)

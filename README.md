@@ -20,4 +20,5 @@ python menu.py
 ```
 
 You can pick between the classic Snake game and a minimal Doom-like
-first-person demo. Press `q` to exit a running game.
+first-person demo. In the Doom demo press the space bar to shoot water
+from your pistol. Press `q` to exit a running game.
