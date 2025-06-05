@@ -1,7 +1,13 @@
-import curses
-import math
+"""Mini Doom demo using pygame with textured walls."""
 
-# Simple map layout: '#' walls, '.' empty space
+from __future__ import annotations
+
+import math
+import sys
+
+import pygame
+
+
 MAP = [
     "##########",
     "#........#",
@@ -10,85 +16,125 @@ MAP = [
     "##########",
 ]
 
-FOV = math.pi / 3  # Field of view (~60 degrees)
+FOV = math.pi / 3
 DEPTH = 16
+SCREEN_WIDTH = 640
+SCREEN_HEIGHT = 480
 
 
-def game_loop(stdscr) -> None:
-    curses.curs_set(0)
-    stdscr.nodelay(True)
-    h, w = stdscr.getmaxyx()
-    player_x, player_y = 3.0, 3.0
-    player_angle = 0.0
-    move_speed = 0.1
-    rot_speed = 0.1
+def create_brick_texture(size: int = 64) -> pygame.Surface:
+    """Return a brick wall texture as a pygame surface."""
+    surf = pygame.Surface((size, size))
+    mortar = (90, 45, 0)
+    brick = (150, 75, 0)
+    line = (80, 40, 0)
+    surf.fill(mortar)
+    brick_w, brick_h = size // 4, size // 4
+    for y in range(0, size, brick_h):
+        offset = (y // brick_h % 2) * (brick_w // 2)
+        for x in range(-offset, size, brick_w):
+            rect = pygame.Rect(x, y, brick_w, brick_h)
+            pygame.draw.rect(surf, brick, rect)
+            pygame.draw.rect(surf, line, rect, 1)
+    return surf.convert()
 
-    while True:
-        key = stdscr.getch()
-        if key == ord("q"):
-            break
-        if key in (curses.KEY_LEFT, ord("a")):
-            player_angle -= rot_speed
-        if key in (curses.KEY_RIGHT, ord("d")):
-            player_angle += rot_speed
-        dx = math.cos(player_angle) * move_speed
-        dy = math.sin(player_angle) * move_speed
-        if key in (curses.KEY_UP, ord("w")):
-            if MAP[int(player_y + dy)][int(player_x + dx)] == '.':
-                player_x += dx
-                player_y += dy
-        if key in (curses.KEY_DOWN, ord("s")):
-            if MAP[int(player_y - dy)][int(player_x - dx)] == '.':
-                player_x -= dx
-                player_y -= dy
 
-        for x in range(w):
-            ray_angle = (player_angle - FOV/2.0) + (x / w) * FOV
-            step_size = 0.05
-            distance_to_wall = 0.0
-            hit_wall = False
-
-            while not hit_wall and distance_to_wall < DEPTH:
-                distance_to_wall += step_size
-                test_x = int(player_x + math.cos(ray_angle) * distance_to_wall)
-                test_y = int(player_y + math.sin(ray_angle) * distance_to_wall)
-                if (test_x < 0 or test_x >= len(MAP[0]) or
-                        test_y < 0 or test_y >= len(MAP)):
-                    hit_wall = True
-                    distance_to_wall = DEPTH
-                elif MAP[test_y][test_x] == '#':
-                    hit_wall = True
-
-            ceiling = int(h / 2 - h / distance_to_wall)
-            floor = h - ceiling
-            if distance_to_wall <= DEPTH / 4.0:
-                shade = '#'
-            elif distance_to_wall < DEPTH / 3.0:
-                shade = 'O'
-            elif distance_to_wall < DEPTH / 2.0:
-                shade = 'x'
-            elif distance_to_wall < DEPTH:
-                shade = '.'
+def cast_ray(px: float, py: float, angle: float) -> tuple[float, float]:
+    """Return distance to wall and horizontal texture coordinate."""
+    step_size = 0.05
+    distance = 0.0
+    hit = False
+    tex_x = 0.0
+    hit_x = px
+    hit_y = py
+    while not hit and distance < DEPTH:
+        distance += step_size
+        hit_x = px + math.cos(angle) * distance
+        hit_y = py + math.sin(angle) * distance
+        cell_x = int(hit_x)
+        cell_y = int(hit_y)
+        if (
+            cell_x < 0
+            or cell_x >= len(MAP[0])
+            or cell_y < 0
+            or cell_y >= len(MAP)
+        ):
+            hit = True
+            distance = DEPTH
+        elif MAP[cell_y][cell_x] == "#":
+            hit = True
+            x_offset = hit_x - cell_x
+            y_offset = hit_y - cell_y
+            if abs(x_offset - 0.5) > abs(y_offset - 0.5):
+                tex_x = y_offset
             else:
-                shade = ' '
+                tex_x = x_offset
+    return distance, tex_x
 
-            for y in range(h):
-                if y < ceiling:
-                    char = ' '
-                elif y > ceiling and y <= floor:
-                    char = shade
-                else:
-                    char = '.'
-                try:
-                    stdscr.addch(y, x, char)
-                except curses.error:
-                    pass
-        stdscr.refresh()
+
+def game_loop() -> None:
+    """Run the textured raycasting demo."""
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    clock = pygame.time.Clock()
+    texture = create_brick_texture()
+
+    px, py = 3.0, 3.0
+    angle = 0.0
+    move_speed = 0.1
+    rot_speed = 0.05
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            angle -= rot_speed
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            angle += rot_speed
+        dx = math.cos(angle) * move_speed
+        dy = math.sin(angle) * move_speed
+        if keys[pygame.K_UP] or keys[pygame.K_w]:
+            if MAP[int(py + dy)][int(px + dx)] == ".":
+                px += dx
+                py += dy
+        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            if MAP[int(py - dy)][int(px - dx)] == ".":
+                px -= dx
+                py -= dy
+
+        screen.fill((0, 0, 0))
+
+        for x in range(SCREEN_WIDTH):
+            ray_angle = angle - FOV / 2 + (x / SCREEN_WIDTH) * FOV
+            distance, tex_x = cast_ray(px, py, ray_angle)
+            wall_height = SCREEN_HEIGHT / max(distance, 0.0001)
+            start = int(SCREEN_HEIGHT / 2 - wall_height / 2)
+            end = int(SCREEN_HEIGHT / 2 + wall_height / 2)
+            tex_column = int(tex_x * texture.get_width())
+            for y in range(start, end):
+                sample_y = (y - start) / max(end - start, 1)
+                tex_y = int(sample_y * texture.get_height())
+                color = texture.get_at((tex_column, tex_y))
+                screen.set_at((x, y), color)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()
 
 
 def main() -> None:
-    curses.wrapper(game_loop)
+    try:
+        game_loop()
+    except KeyboardInterrupt:
+        pygame.quit()
+        sys.exit()
 
 
 if __name__ == "__main__":
     main()
+

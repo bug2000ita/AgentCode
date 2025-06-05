@@ -4,8 +4,8 @@ This project contains simple terminal games written in Python.
 
 ## Installation
 
-On Unix-like systems no extra dependencies are required. Windows users
-need the `windows-curses` package:
+The Doom demo now uses pygame. Install dependencies with pip. Windows
+users additionally need the `windows-curses` package:
 
 ```bash
 pip install -r requirements.txt
