@@ -22,20 +22,17 @@ SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
 
 
-def create_brick_texture(size: int = 64) -> pygame.Surface:
-    """Return a brick wall texture as a pygame surface."""
+def create_ball_texture(size: int = 64) -> pygame.Surface:
+    """Return a red ball texture as a pygame surface."""
     surf = pygame.Surface((size, size))
-    mortar = (90, 45, 0)
-    brick = (150, 75, 0)
-    line = (80, 40, 0)
-    surf.fill(mortar)
-    brick_w, brick_h = size // 4, size // 4
-    for y in range(0, size, brick_h):
-        offset = (y // brick_h % 2) * (brick_w // 2)
-        for x in range(-offset, size, brick_w):
-            rect = pygame.Rect(x, y, brick_w, brick_h)
-            pygame.draw.rect(surf, brick, rect)
-            pygame.draw.rect(surf, line, rect, 1)
+    background = (40, 20, 20)
+    ball_color = (255, 0, 0)
+    surf.fill(background)
+    radius = size // 8
+    for y in range(radius, size, radius * 2):
+        offset = (y // (radius * 2) % 2) * radius
+        for x in range(radius - offset, size, radius * 2):
+            pygame.draw.circle(surf, ball_color, (x, y), radius)
     return surf.convert()
 
 
@@ -77,7 +74,7 @@ def game_loop() -> None:
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-    texture = create_brick_texture()
+    texture = create_ball_texture()
 
     # List of active water "splashes" drawn when the player shoots.
     # Each entry is a countdown of frames to keep the splash visible.
