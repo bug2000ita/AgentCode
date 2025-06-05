@@ -1,58 +1,28 @@
-print(r"""
----------------------------------------------------------------
-|                         thermo scientific                   |
----------------------------------------------------------------
+"""Simple game selection menu."""
 
-Start
- ├── Session Creation
-Preparation
- ├── Session Setup
- ├── Square Selection
- ├── Image Selection
- ├── Template Definition
-Execution
- └── Automated Acquisition
+from __future__ import annotations
 
----------------------------------------------------------------
-|                           Session                            |
-|-------------------------------------------------------------|
-| General session settings                                    |
-|-------------------------------------------------------------|
-| Session name: giovanni.mariotta_20240603_101250_59         |
-| Grid type:  ○ Holey carbon  ● Lacey carbon  ○ Holey gold    |
-| Geometry type:  ● Square  ○ Hexagonal  ○ Unknown            |
-| Session type:  ● Automated  ○ Manual                        |
-| Acquisition Mode:  ● Accurate  ○ Faster                     |
-| Tilted Acquisition: (checkbox, not visible)                 |
-|-------------------------------------------------------------|
-| Output settings                                             |
-|-------------------------------------------------------------|
-| Image format:  ● MRC  ○ TIFF                                |
-| Output folder:                                              |
-|   C:\\Users\\giovanni.mariotta\\OneDrive - Thermo Fisher S... |
-|   [x] Set as default storage folder                         |
-|-------------------------------------------------------------|
-| Email settings                                              |
-| Email recipients:                                           |
-|   [                    ]  [Test]                            |
-|-------------------------------------------------------------|
-|                        [ Apply ]                            |
----------------------------------------------------------------
 
-Messages
----------------------------------------------------------------
-Filtering:  [0 Error(s)]  [0 Notification(s)]
+def main() -> None:
+    while True:
+        print()
+        print("Select a game:")
+        print("1) Snake")
+        print("2) Mini Doom")
+        print("3) Quit")
+        choice = input("Enter choice [1-3]: ").strip()
+        if choice == "1":
+            from snake import main as snake_main
+            snake_main()
+        elif choice == "2":
+            from doom import main as doom_main
+            doom_main()
+        elif choice == "3":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
-Status
----------------------------------------------------------------
-EPU Assistant
-  ● llama3
-  ○ llama3Multi
 
-[ Ask To AI Assistant ]  [ ] Content-Aware
-""")
-
-input("Press Enter to start the snake game...")
-
-from snake import main
-main()
+if __name__ == "__main__":
+    main()

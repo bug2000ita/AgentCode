@@ -1,10 +1,10 @@
-# Snake Game
+# Terminal Games
 
-A simple terminal-based snake game using Python's `curses` module.
+This project contains simple terminal games written in Python.
 
 ## Installation
 
-Install dependencies (none are required on Unix-like systems). Windows users
+On Unix-like systems no extra dependencies are required. Windows users
 need the `windows-curses` package:
 
 ```bash
@@ -13,17 +13,11 @@ pip install -r requirements.txt
 
 ## Running
 
-Execute the game with:
+Use `menu.py` to choose which game to play:
 
 ```bash
-python snake.py
+python menu.py
 ```
 
-Or after installing as a package:
-
-```bash
-pip install .
-python -m snake
-```
-
-Press Ctrl+C to exit the game.
+You can pick between the classic Snake game and a minimal Doom-like
+first-person demo. Press `q` to exit a running game.
