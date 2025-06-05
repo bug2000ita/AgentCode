@@ -1,2 +1,2 @@
-# External dependencies for the snake game
+# External dependencies for the terminal games
 windows-curses; sys_platform == 'win32'

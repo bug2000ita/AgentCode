@@ -3,9 +3,9 @@ requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "snake-game"
+name = "terminal-games"
 version = "0.1.0"
-description = "Terminal based snake game"
+description = "Collection of simple terminal games"
 authors = [{name = "Unknown", email = "unknown@example.com"}]
 readme = "README.md"
 requires-python = ">=3.7"
@@ -15,3 +15,4 @@ dependencies = [
 
 [project.scripts]
 snake = "snake:main"
+doom_demo = "doom:main"
