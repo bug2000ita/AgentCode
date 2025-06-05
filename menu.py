@@ -9,8 +9,9 @@ def main() -> None:
         print("Select a game:")
         print("1) Snake")
         print("2) Mini Doom")
-        print("3) Quit")
-        choice = input("Enter choice [1-3]: ").strip()
+        print("3) Jira Chatbot")
+        print("4) Quit")
+        choice = input("Enter choice [1-4]: ").strip()
         if choice == "1":
             from snake import main as snake_main
             snake_main()
@@ -18,6 +19,9 @@ def main() -> None:
             from doom import main as doom_main
             doom_main()
         elif choice == "3":
+            from jira_bot import main as jira_main
+            jira_main()
+        elif choice == "4":
             print("Goodbye!")
             break
         else:
