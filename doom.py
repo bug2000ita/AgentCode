@@ -36,6 +36,25 @@ def create_ball_texture(size: int = 64) -> pygame.Surface:
     return surf.convert()
 
 
+def create_bear_texture(size: int = 64) -> pygame.Surface:
+    """Return a simple baby bear texture."""
+    surf = pygame.Surface((size, size), pygame.SRCALPHA)
+    brown = (150, 110, 60)
+    black = (0, 0, 0)
+
+    ear_r = size // 6
+    face_r = size // 3
+    pygame.draw.circle(surf, brown, (size // 3, size // 3), ear_r)
+    pygame.draw.circle(surf, brown, (size * 2 // 3, size // 3), ear_r)
+    pygame.draw.circle(surf, brown, (size // 2, size // 2 + ear_r // 2), face_r)
+    eye_r = max(1, size // 32)
+    eye_y = size // 2
+    pygame.draw.circle(surf, black, (size // 2 - ear_r // 2, eye_y), eye_r)
+    pygame.draw.circle(surf, black, (size // 2 + ear_r // 2, eye_y), eye_r)
+    pygame.draw.circle(surf, black, (size // 2, size // 2 + ear_r), eye_r + 1)
+    return surf.convert_alpha()
+
+
 def cast_ray(px: float, py: float, angle: float) -> tuple[float, float]:
     """Return distance to wall and horizontal texture coordinate."""
     step_size = 0.05
@@ -75,6 +94,9 @@ def game_loop() -> None:
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     texture = create_ball_texture()
+    bear_texture = create_bear_texture()
+
+    enemy_pos = [5.5, 2.5]
 
     # List of active water "splashes" drawn when the player shoots.
     # Each entry is a countdown of frames to keep the splash visible.
@@ -120,6 +142,11 @@ def game_loop() -> None:
             ):
                 px, py = nx, ny
 
+        # Check collision with the enemy
+        if math.hypot(px - enemy_pos[0], py - enemy_pos[1]) < 0.5:
+            print("You were mauled by a baby bear!")
+            running = False
+
         screen.fill((0, 0, 0))
 
         for x in range(SCREEN_WIDTH):
@@ -132,6 +159,27 @@ def game_loop() -> None:
             column = texture.subsurface(pygame.Rect(tex_column, 0, 1, texture.get_height()))
             column = pygame.transform.scale(column, (1, end - start))
             screen.blit(column, (x, start))
+
+        # Draw the baby bear enemy if it's visible
+        dx = enemy_pos[0] - px
+        dy = enemy_pos[1] - py
+        dist = math.hypot(dx, dy)
+        angle_to_enemy = math.atan2(dy, dx)
+        rel_angle = (angle_to_enemy - angle + math.pi) % (2 * math.pi) - math.pi
+        if abs(rel_angle) < FOV / 2:
+            wall_dist, _ = cast_ray(px, py, angle_to_enemy)
+            if dist < wall_dist:
+                size = SCREEN_HEIGHT / max(dist, 0.0001)
+                sprite = pygame.transform.scale(
+                    bear_texture, (int(size), int(size))
+                )
+                screen_x = SCREEN_WIDTH / 2 - (rel_angle / (FOV / 2)) * (
+                    SCREEN_WIDTH / 2
+                )
+                screen.blit(
+                    sprite,
+                    (screen_x - size / 2, SCREEN_HEIGHT / 2 - size / 2),
+                )
 
         # Draw active water splashes at the center of the screen.
         for i in range(len(splashes)):
@@ -170,4 +218,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
